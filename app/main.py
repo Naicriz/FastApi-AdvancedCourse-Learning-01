@@ -26,7 +26,8 @@ class Location(BaseModel):
     state: str
     country: str
 
-class Person(BaseModel): 
+# Contendrá todos el código que comparte Person y PersonOut y éstas heredarán de PersonBase
+class PersonBase(BaseModel):
     first_name: str = Field(
         ..., 
         min_length=1,
@@ -47,44 +48,28 @@ class Person(BaseModel):
     )
     hair_color: Optional[HairColor] = Field(default=None, example=HairColor.black)
     is_married: Optional[bool] = Field(default=None, example=False)
+
+class Person(PersonBase): #Es lo único que no hereda de PersonBase
     password: str = Field(..., min_length=8)
 
-    # class Config:  # example of config for pydantic to validate the model
-    #     schema_extra = {
-    #         "example": {
-    #             "first_name": "Facundo",
-    #             "last_name": "Garcia Martoni",
-    #             "age": 21, 
-    #             "hair_color": "blonde",
-    #             "is_married": False
-    #         }
-    #     }
+"""
+class Config:  # example of config for pydantic to validate the model
+    schema_extra = {
+        "example": {
+            "first_name": "Facundo",
+            "last_name": "Garcia Martoni",
+            "age": 21, 
+            "hair_color": "blonde",
+            "is_married": False
+        }
+    }
+"""
 
-    #Ejemplo 1 - Output Model Person
-"""
-class PersonOut(BaseModel):
-    first_name: str = Field(
-        ..., 
-        min_length=1,
-        max_length=50,
-        example="Miguel"
-        )
-    last_name: str = Field(
-        ..., 
-        min_length=1,
-        max_length=50,
-        example="Torres"
-        )
-    age: int = Field(
-        ...,
-        gt=0,
-        le=115,
-        example=25
-    )
-    hair_color: Optional[HairColor] = Field(default=None, example=HairColor.black)
-    is_married: Optional[bool] = Field(default=None, example=False)
-"""
- 
+#Ejemplo 1 - Output Model Person
+class PersonOut(PersonBase): # Solo hereda de PersonBase
+    pass
+
+
     ##Path Parameters are always required!##
     # Request and Response Body (FastAPI)
 
@@ -92,18 +77,19 @@ class PersonOut(BaseModel):
 def home(): 
     return {"Hello": "World"}
 
+"""
     # Ejemplo 2 - Output Model Person (This can be used as a quick shortcut if you have only one Pydantic model and want to remove some data from the output.)
 
 @app.post("/person/new", response_model=Person, response_model_exclude={"password"})
-def create_person(person: Person): 
-    return person
-
-    # Ejemplo 1 - Output Model Person con el modelo de person pero en el path decorator se puede usar el modelo de personOut para el response.
-"""
-@app.post("/person/new", response_model=PersonOut, status_code=201) #response_model is the model that will be returned in the response body
 def create_person(person: Person = Body(...)): 
     return person
 """
+
+    # Ejemplo 1 - Output Model Person con el modelo de person pero en el path decorator se puede usar el modelo de personOut para el response.
+@app.post("/person/new", response_model=PersonOut, status_code=201) #response_model is the model that will be returned in the response body
+def create_person(person: Person = Body(...)): 
+    return person
+
     # Validaciones: Query Parameters (FastAPI)  (Query Parameters are always optional)
 
 @app.get("/person/detail")
