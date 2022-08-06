@@ -8,7 +8,7 @@ from pydantic import Field
 
 #FastAPI
 from fastapi import FastAPI
-from fastapi import Body, Query, Path
+from fastapi import Body, Query, Path, Form
 
 app = FastAPI()
 
@@ -69,6 +69,9 @@ class Config:  # example of config for pydantic to validate the model
 class PersonOut(PersonBase): # Solo hereda de PersonBase
     pass
 
+class LoginOut(BaseModel): # Solo retornará el username ###y el token?)
+    username: str = Field(..., min_length=1, max_length=20, example="JhonDoe98")
+    message: str = 'Succesfully Logged'
 
     ##Path Parameters are always required!##
     # Request and Response Body (FastAPI)
@@ -160,3 +163,11 @@ def update_person(
     #results.update(location.dict())
     #return results
     return person
+
+@app.post(
+    path = "/login",
+    response_model = LoginOut,
+    status_code = 200
+)
+async def login(username: str = Form(...), password: str = Form(...)): #campos formulario que vendrá del frontend
+    return LoginOut(username = username)
