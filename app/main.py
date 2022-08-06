@@ -8,6 +8,7 @@ from pydantic import Field
 
 #FastAPI
 from fastapi import FastAPI
+from fastapi import HTTPException
 from fastapi import Body, Query, Path, Form, Header, Cookie, File, UploadFile
 
 app = FastAPI()
@@ -128,6 +129,8 @@ def show_person(
 
     # Validaciones: Path Parameters (FastAPI)
 
+persons = [1, 2, 3, 4, 5] # Lista de personas
+
 @app.get(
     path = "/person/detail/{person_id}",
     response_model = PersonOut,
@@ -139,7 +142,9 @@ def show_person(
         gt = 0,
         example = 123
         )
-): 
+):  # Si se ingresa un id que no existe, retornará una http exception con status code 404 (Not Found) y el mensaje de error.
+    if person_id not in persons:
+        raise HTTPException(status_code=404, detail="Person not found... :(") # raise es una función que lanza una excepción.
     return {person_id: "It exists!"}
 
     # Validaciones: Request Body (FastAPI)
@@ -223,7 +228,7 @@ def post_image(
         "File Name": image.filename, # nombre del archivo
         "Content Type": image.content_type, # content_type es el tipo de archivo que se subió
         #"Size (kb)": round(len(image.file.read())/1024, ndigits = 2) # len(image.file.read()) es el tamaño en bytes y se divide por 1024 para obtener el tamaño en kilobytes.
-        "Size (mb)": round(len(image.file.read())/(1024*1024), ndigits = 2) # len(image.file.read()) es el tamaño en bytes y se multiplica por 1024 para obtener el tamaño en megabytes.
+        "Size (mb)": round(len(image.file.read())/(1024*1024), ndigits = 2) # len(image.file.read()) es el tamaño en bytes y se divide en 1024*1024 para obtener el tamaño en megabytes.
 
     }
 
