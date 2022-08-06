@@ -1,5 +1,5 @@
 #Python
-from typing import Optional
+from typing import List, Optional
 from enum import Enum
 
 #Pydantic
@@ -8,7 +8,7 @@ from pydantic import Field
 
 #FastAPI
 from fastapi import FastAPI
-from fastapi import Body, Query, Path, Form, Header, Cookie
+from fastapi import Body, Query, Path, Form, Header, Cookie, File, UploadFile
 
 app = FastAPI()
 
@@ -26,7 +26,7 @@ class Location(BaseModel):
     state: str
     country: str
 
-# Contiene todo el código que compartía previamente Person y PersonOut y éstas ahora heredarán de PersonBase
+    # Contiene todo el código que compartía previamente Person y PersonOut y éstas ahora heredarán de PersonBase.
 class PersonBase(BaseModel):
     first_name: str = Field(
         ..., 
@@ -49,7 +49,7 @@ class PersonBase(BaseModel):
     hair_color: Optional[HairColor] = Field(default=None, example=HairColor.black)
     is_married: Optional[bool] = Field(default=None, example=False)
 
-class Person(PersonBase): # Password es lo único que no hereda de PersonBase
+class Person(PersonBase): # Password es lo único que no hereda de PersonBase.
     password: str = Field(..., min_length=8)
 
 """
@@ -65,8 +65,8 @@ class Config:  # example of config for pydantic to validate the model
     }
 """
 
-#Ejemplo 1 - Output Model Person
-class PersonOut(PersonBase): # Solo hereda de PersonBase
+    #Ejemplo 1 - Output Model Person
+class PersonOut(PersonBase): # Solo hereda de PersonBase.
     pass
 
 class LoginOut(BaseModel): # Solo retornará el username ###y el token?)
@@ -92,7 +92,7 @@ def create_person(person: Person = Body(...)):
 """
 
     # Ejemplo 1 - Output Model Person con el modelo de person pero en el path decorator se puede usar el modelo de personOut para el response.
-        # response_model is the model that will be returned in the response body
+        # response_model is the model that will be returned in the response body.
 @app.post(
     path = "/person/new",
     response_model = PersonOut,
@@ -101,7 +101,7 @@ def create_person(person: Person = Body(...)):
 def create_person(person: Person = Body(...)): 
     return person
 
-    # Validaciones: Query Parameters (FastAPI)  (Query Parameters are always optional)
+    # Validaciones: Query Parameters (FastAPI)  [Query Parameters are always optional]
 
 @app.get(
     path = "/person/detail",
@@ -171,7 +171,10 @@ def update_person(
     response_model = LoginOut,
     status_code = 200
 )
-def login(username: str = Form(...), password: str = Form(...)): #campos formulario que vendrá del frontend
+def login( #campos de formulario que vendrán del frontend.
+    username: str = Form(...),
+    password: str = Form(...)
+    ):
     return LoginOut(username = username)
 
     # Parametros: Cookies and Headers (FastAPI)
@@ -183,19 +186,19 @@ def login(username: str = Form(...), password: str = Form(...)): #campos formula
 def contact(
     first_name: str = Form(
         ...,
-        max_length=20,
-        min_length=3,
-        example="Miguel"
+        max_length = 20,
+        min_length = 3,
+        example = "Miguel"
     ),
     last_name: str = Form(
         ...,
-        max_length=20,
-        min_length=3,
-        example="Torres"
+        max_length = 20,
+        min_length = 3,
+        example = "Torres"
     ),
     email: EmailStr = Form(
         ...,
-        example="example@example.cl"
+        example = "example@example.cl"
     ),
     message: str = Form(
         ...,
@@ -207,3 +210,36 @@ def contact(
     ads: Optional[str] = Cookie(default=None)
 ):
     return user_agent
+
+    # Parametros: Files (FastAPI)
+
+@app.post(
+    path = "/upload-image",
+)
+def post_image(
+    image: UploadFile = File(...)
+):
+    return {
+        "File Name": image.filename, # nombre del archivo
+        "Content Type": image.content_type, # content_type es el tipo de archivo que se subió
+        #"Size (kb)": round(len(image.file.read())/1024, ndigits = 2) # len(image.file.read()) es el tamaño en bytes y se divide por 1024 para obtener el tamaño en kilobytes.
+        "Size (mb)": round(len(image.file.read())/(1024*1024), ndigits = 2) # len(image.file.read()) es el tamaño en bytes y se multiplica por 1024 para obtener el tamaño en megabytes.
+
+    }
+
+"""
+@app.post(
+    path = "/upload-images",
+    status_code=200
+)
+def upload_images(
+    images: List[UploadFile] = File(...)
+):
+    info_images = [{
+        "File Name": image.filename,
+        "Format": image.content_type,
+        "Size(kb)": round(len(image.file.read())/1024, ndigits=2) # len(image.file.read()) es el tamaño en bytes y se divide por 1024 para obtener el tamaño en kilobytes.
+    } for image in images]
+
+    return info_images
+"""
