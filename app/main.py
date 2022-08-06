@@ -26,7 +26,7 @@ class Location(BaseModel):
     state: str
     country: str
 
-# Contendrá todos el código que comparte Person y PersonOut y éstas heredarán de PersonBase
+# Contiene todo el código que compartía previamente Person y PersonOut y éstas ahora heredarán de PersonBase
 class PersonBase(BaseModel):
     first_name: str = Field(
         ..., 
@@ -49,7 +49,7 @@ class PersonBase(BaseModel):
     hair_color: Optional[HairColor] = Field(default=None, example=HairColor.black)
     is_married: Optional[bool] = Field(default=None, example=False)
 
-class Person(PersonBase): #Es lo único que no hereda de PersonBase
+class Person(PersonBase): # Password es lo único que no hereda de PersonBase
     password: str = Field(..., min_length=8)
 
 """
@@ -73,7 +73,10 @@ class PersonOut(PersonBase): # Solo hereda de PersonBase
     ##Path Parameters are always required!##
     # Request and Response Body (FastAPI)
 
-@app.get("/")
+@app.get(
+    path = "/",
+    status_code = 200
+    )
 def home(): 
     return {"Hello": "World"}
 
@@ -86,53 +89,69 @@ def create_person(person: Person = Body(...)):
 """
 
     # Ejemplo 1 - Output Model Person con el modelo de person pero en el path decorator se puede usar el modelo de personOut para el response.
-@app.post("/person/new", response_model=PersonOut, status_code=201) #response_model is the model that will be returned in the response body
+        # response_model is the model that will be returned in the response body
+@app.post(
+    path = "/person/new",
+    response_model = PersonOut,
+    status_code = 201 # status 201 significa que se creó un nuevo recurso
+    )
 def create_person(person: Person = Body(...)): 
     return person
 
     # Validaciones: Query Parameters (FastAPI)  (Query Parameters are always optional)
 
-@app.get("/person/detail")
+@app.get(
+    path = "/person/detail",
+    response_model = PersonOut,
+    status_code = 200 # status code 200 significa que se obtuvo un recurso
+    )
 def show_person(
     name: Optional[str] = Query(
         None,
-        min_length=1, 
-        max_length=50,
-        title="Person Name",
-        description="This is the person name. It's between 1 and 50 characters",
-        example="Rocio"
+        min_length = 1, 
+        max_length = 50,
+        title = "Person Name",
+        description = "This is the person name. It's between 1 and 50 characters.",
+        example = "Marge"
         ),
     age: str = Query(
         ...,
-        title="Person Age",
-        description="This is the person age. It's required",
-        example=25
+        title = "Person Age",
+        description = "This is the person age. It's required.",
+        example = 25
         )
 ): 
     return {name: age}
 
     # Validaciones: Path Parameters (FastAPI)
 
-@app.get("/person/detail/{person_id}")
+@app.get(
+    path = "/person/detail/{person_id}",
+    response_model = PersonOut,
+    status_code = 200
+    )
 def show_person(
     person_id: int = Path(
         ..., 
-        gt=0,
-        example=123
+        gt = 0,
+        example = 123
         )
 ): 
     return {person_id: "It exists!"}
 
     # Validaciones: Request Body (FastAPI)
 
-@app.put("/person/{person_id}")
+@app.put(
+    path = "/person/{person_id}",
+    status_code = 202 # status code 202 significa que se actualizó un recurso
+    )
 def update_person(
     person_id: int = Path(
         ...,
-        title="Person ID",
-        description="This is the person ID",
-        gt=0,
-        example=123
+        title = "Person ID",
+        description = "This is the person ID. It's required.",
+        gt = 0,
+        example = 38472
     ),
     person: Person = Body(...),
     #location: Location = Body(...)
