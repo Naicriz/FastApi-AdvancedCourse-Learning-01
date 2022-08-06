@@ -97,7 +97,8 @@ def create_person(person: Person = Body(...)):
 @app.post(
     path = "/person/new",
     response_model = PersonOut,
-    status_code = 201 # status 201 significa que se creó un nuevo recurso
+    status_code = 201, # status 201 significa que se creó un nuevo recurso
+    tags = ["Persons"] # tags are used to group endpoints in the documentation.
     )
 def create_person(person: Person = Body(...)): 
     return person
@@ -107,7 +108,8 @@ def create_person(person: Person = Body(...)):
 @app.get(
     path = "/person/detail",
     response_model = PersonOut,
-    status_code = 200 # status code 200 significa que se obtuvo un recurso
+    status_code = 200, # status code 200 significa que se obtuvo un recurso
+    tags = ["Persons"]
     )
 def show_person(
     name: Optional[str] = Query(
@@ -134,7 +136,8 @@ persons = [1, 2, 3, 4, 5] # Lista de personas
 @app.get(
     path = "/person/detail/{person_id}",
     response_model = PersonOut,
-    status_code = 200
+    status_code = 200,
+    tags = ["Persons"]
     )
 def show_person(
     person_id: int = Path(
@@ -151,7 +154,8 @@ def show_person(
 
 @app.put(
     path = "/person/{person_id}",
-    status_code = 202 # status code 202 significa que se actualizó un recurso
+    status_code = 202, # status code 202 significa que se actualizó un recurso
+    tags = ["Persons"]
     )
 def update_person(
     person_id: int = Path(
@@ -174,19 +178,21 @@ def update_person(
 @app.post(
     path = "/login",
     response_model = LoginOut,
-    status_code = 200
+    status_code = 200,
+    tags = ["Persons", "Login"]
 )
 def login( #campos de formulario que vendrán del frontend.
     username: str = Form(...),
     password: str = Form(...)
     ):
-    return LoginOut(username = username)
+    return LoginOut(username = username) # la clase a retornar es LoginOut y esta al crear el objeto lo convierte a JSON.
 
     # Parametros: Cookies and Headers (FastAPI)
 
 @app.post(
     path = "/contact",
-    status_code=200
+    status_code=200,
+    tags = ["Forms"]
 )
 def contact(
     first_name: str = Form(
@@ -220,6 +226,8 @@ def contact(
 
 @app.post(
     path = "/upload-image",
+    status_code = 200,
+    tags = ["Files"]
 )
 def post_image(
     image: UploadFile = File(...)
