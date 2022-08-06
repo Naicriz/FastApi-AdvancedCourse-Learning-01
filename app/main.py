@@ -3,12 +3,12 @@ from typing import Optional
 from enum import Enum
 
 #Pydantic
-from pydantic import BaseModel
+from pydantic import BaseModel, EmailStr
 from pydantic import Field
 
 #FastAPI
 from fastapi import FastAPI
-from fastapi import Body, Query, Path, Form
+from fastapi import Body, Query, Path, Form, Header, Cookie
 
 app = FastAPI()
 
@@ -164,10 +164,46 @@ def update_person(
     #return results
     return person
 
+    # Forms
+
 @app.post(
     path = "/login",
     response_model = LoginOut,
     status_code = 200
 )
-async def login(username: str = Form(...), password: str = Form(...)): #campos formulario que vendrá del frontend
+def login(username: str = Form(...), password: str = Form(...)): #campos formulario que vendrá del frontend
     return LoginOut(username = username)
+
+    # Parametros: Cookies and Headers (FastAPI)
+
+@app.post(
+    path = "/contact",
+    status_code=200
+)
+def contact(
+    first_name: str = Form(
+        ...,
+        max_length=20,
+        min_length=3,
+        example="Miguel"
+    ),
+    last_name: str = Form(
+        ...,
+        max_length=20,
+        min_length=3,
+        example="Torres"
+    ),
+    email: EmailStr = Form(
+        ...,
+        example="example@example.cl"
+    ),
+    message: str = Form(
+        ...,
+        max_length=200,
+        min_length=10
+    ),
+    # Header http que nos dice quien está intentando usar esta parte de la api (path operation)
+    user_agent: Optional[str] = Header(default=None), # default=None significa que no se requiere el header
+    ads: Optional[str] = Cookie(default=None)
+):
+    return user_agent
