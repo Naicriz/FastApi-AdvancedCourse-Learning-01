@@ -145,7 +145,8 @@ def create_person(
     path = "/person/detail",
     response_model = PersonOut,
     status_code = 200, # status code 200 significa que se obtuvo un recurso
-    tags = ["Persons"]
+    tags = ["Persons"],
+    deprecated=True # deprecated is used to mark an endpoint as deprecated.
     )
 def show_person(
     name: Optional[str] = Query(
